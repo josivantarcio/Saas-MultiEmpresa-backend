@@ -23,6 +23,9 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Implementação inicial do merchant-portal (portal do lojista)
   - Configuração do Redux Toolkit para gerenciamento de estado
   - Implementação da página de login com autenticação
+  - Implementação do layout do dashboard com barra lateral de navegação
+  - Implementação da página principal do dashboard com estatísticas e pedidos recentes
+  - Implementação da página de produtos com listagem, filtragem e ações CRUD
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
