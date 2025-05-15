@@ -28,6 +28,7 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Implementação da página de produtos com listagem, filtragem e ações CRUD
   - Implementação da página de pedidos com listagem, filtragem e gerenciamento de status
   - Implementação da página de pagamentos com estatísticas, listagem, filtragem e ações de reembolso/cancelamento
+  - Implementação da página de clientes com estatísticas, listagem, filtragem, ordenação e gerenciamento de status
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
