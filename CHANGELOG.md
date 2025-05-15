@@ -11,6 +11,8 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Serviços para lógica de negócios
   - Controladores para endpoints da API
   - Integração com gateway de pagamentos Asaas
+  - Testes unitários para os serviços (PaymentService, SubscriptionService, TransactionService)
+  - Testes de integração para os controladores (PaymentController, WebhookController)
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
@@ -28,7 +30,7 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Controladores para endpoints da API
 
 ### Próximos Passos
-1. Implementar testes unitários e de integração para todos os microserviços
+1. Implementar testes unitários e de integração para os demais microserviços
 2. Configurar CI/CD para os microserviços
 3. Iniciar o desenvolvimento do frontend com Next.js
 4. Implementar a integração entre os microserviços
