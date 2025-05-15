@@ -13,6 +13,11 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Integração com gateway de pagamentos Asaas
   - Testes unitários para os serviços (PaymentService, SubscriptionService, TransactionService)
   - Testes de integração para os controladores (PaymentController, WebhookController)
+- Configuração de CI/CD com GitHub Actions para todos os microserviços
+  - Fluxos de trabalho separados para cada microserviço (auth, catalog, checkout, payments)
+  - Pipelines automatizados para build, teste e deploy
+  - Ambientes de staging e produção configurados
+  - Integração com Render para deploy automático
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
@@ -31,14 +36,13 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
 
 ### Próximos Passos
 1. Implementar testes unitários e de integração para os demais microserviços
-2. Configurar CI/CD para os microserviços
-3. Iniciar o desenvolvimento do frontend com Next.js
-4. Implementar a integração entre os microserviços
-5. Configurar o ambiente de produção no Render (backend) e Vercel (frontend)
-6. Implementar monitoramento e logging
-7. Realizar testes de carga e otimização de performance
-8. Implementar documentação da API com Swagger
-9. Configurar backup automático dos bancos de dados
+2. Iniciar o desenvolvimento do frontend com Next.js
+3. Implementar a integração entre os microserviços
+4. Configurar o ambiente de produção no Render (backend) e Vercel (frontend)
+5. Implementar monitoramento e logging
+6. Realizar testes de carga e otimização de performance
+7. Implementar documentação da API com Swagger
+8. Configurar backup automático dos bancos de dados
 
 ## Instruções para Contribuição
 

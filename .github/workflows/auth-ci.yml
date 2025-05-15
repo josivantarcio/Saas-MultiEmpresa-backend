@@ -1,0 +1,107 @@
+name: Auth Microservice CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/microservices/auth/**'
+      - '.github/workflows/auth-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/microservices/auth/**'
+      - '.github/workflows/auth-ci.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: auth_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package.json'
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Lint
+        run: cd backend && npm run lint
+
+      - name: Build
+        run: cd backend && npm run build
+
+      - name: Run tests
+        run: cd backend && npm run test:auth
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: auth_test
+          JWT_SECRET: test-secret
+          JWT_EXPIRES_IN: 1h
+
+  deploy-staging:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package.json'
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Build
+        run: cd backend && npm run build
+
+      - name: Deploy to Render (Staging)
+        run: |
+          echo "Deploying to Render staging environment..."
+          # Aqui você adicionaria os comandos para deploy no Render
+          # Por exemplo, usando a API do Render ou CLI
+          # Este é um placeholder, já que o deploy real depende da configuração do Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
+  deploy-production:
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Deploy to Render (Production)
+        run: |
+          echo "Deploying to Render production environment..."
+          # Aqui você adicionaria os comandos para deploy no Render
+          # Este é um placeholder, já que o deploy real depende da configuração do Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
