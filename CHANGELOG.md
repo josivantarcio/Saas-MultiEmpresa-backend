@@ -18,6 +18,11 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Pipelines automatizados para build, teste e deploy
   - Ambientes de staging e produção configurados
   - Integração com Render para deploy automático
+- Início do desenvolvimento do frontend com Next.js
+  - Estruturação do projeto em três aplicações: admin-portal, merchant-portal e storefront
+  - Implementação inicial do merchant-portal (portal do lojista)
+  - Configuração do Redux Toolkit para gerenciamento de estado
+  - Implementação da página de login com autenticação
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
