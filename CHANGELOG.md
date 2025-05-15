@@ -22,7 +22,7 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Estruturação do projeto em três aplicações: admin-portal, merchant-portal e storefront
   - Implementação inicial do merchant-portal (portal do lojista)
   - Configuração do Redux Toolkit para gerenciamento de estado
-  - Implementação da página de login com autenticação
+  - Implementação da interface do portal do lojista (merchant-portal)
   - Implementação do layout do dashboard com barra lateral de navegação
   - Implementação da página principal do dashboard com estatísticas e pedidos recentes
   - Implementação da página de produtos com listagem, filtragem e ações CRUD
@@ -30,6 +30,18 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Implementação da página de pagamentos com estatísticas, listagem, filtragem e ações de reembolso/cancelamento
   - Implementação da página de clientes com estatísticas, listagem, filtragem, ordenação e gerenciamento de status
   - Implementação da página de configurações com abas para gerenciar informações da loja, pagamento e envio
+- Implementação da interface do portal administrativo (admin-portal)
+  - Configuração do projeto Next.js com Redux Toolkit, Formik e TailwindCSS
+  - Implementação do layout do dashboard administrativo
+  - Implementação da página de login com autenticação
+  - Implementação da página principal do dashboard com estatísticas da plataforma
+  - Implementação da página de gerenciamento de lojistas (tenants)
+  - Implementação da página de gerenciamento de planos
+  - Implementação da página de gerenciamento de assinaturas
+- Implementação da interface da loja virtual (storefront)
+  - Configuração do projeto Next.js com Redux Toolkit e TailwindCSS
+  - Implementação do layout da loja com cabeçalho e rodapé
+  - Implementação da página inicial com banner, categorias em destaque e produtos
 - Implementação do microserviço de checkout completo
   - Entidades: Cart, CartItem, Order, OrderItem, PaymentMethod, ShippingMethod
   - Repositórios para gerenciamento de dados
