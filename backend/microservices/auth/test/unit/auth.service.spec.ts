@@ -341,8 +341,8 @@ describe('AuthService', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
+        role: 'tenant_owner',
         tenantId: 'tenant123',
-        role: UserRole.TENANT_ADMIN,
       }));
     });
 

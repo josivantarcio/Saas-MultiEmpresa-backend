@@ -1,14 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { CartController } from '../../src/controllers/cart.controller';
 import { CartService } from '../../src/services/cart.service';
 import { AuthGuard } from '@nestjs/passport';
 
 // Mock do AuthGuard para testes de integração
-const mockAuthGuard = {
-  canActivate: jest.fn().mockImplementation(() => true),
-};
+class MockAuthGuard {
+  canActivate(context) {
+    const request = context.switchToHttp().getRequest();
+    request.user = { tenantId: 'tenant123', userId: 'user123' };
+    return true;
+  }
+}
 
 // Mock do CartService
 const mockCartService = {
@@ -45,7 +49,7 @@ describe('CartController (Integration)', () => {
       ],
     })
       .overrideGuard(AuthGuard('jwt'))
-      .useValue(mockAuthGuard)
+      .useClass(MockAuthGuard)
       .compile();
 
     app = moduleFixture.createNestApplication();

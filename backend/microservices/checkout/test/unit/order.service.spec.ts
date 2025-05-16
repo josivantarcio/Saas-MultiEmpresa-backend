@@ -20,6 +20,7 @@ const mockOrderRepository = () => ({
   updateItem: jest.fn(),
   updateItemStatus: jest.fn(),
   getOrderStats: jest.fn(),
+  addItem: jest.fn(),
 });
 
 const mockCartRepository = () => ({

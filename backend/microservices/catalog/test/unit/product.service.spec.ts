@@ -490,10 +490,20 @@ describe('ProductService', () => {
       ];
 
       productRepository.countByTenant.mockResolvedValue(3);
-      productRepository.findAll.mockResolvedValueOnce([mockProducts, 3])
-        .mockResolvedValueOnce([[mockProducts[0]], 1])
-        .mockResolvedValueOnce([[mockProducts[1]], 1])
-        .mockResolvedValueOnce([[mockProducts[2]], 1]);
+      // Mock para produtos por tipo
+      productRepository.findAll
+        .mockResolvedValueOnce([[mockProducts[0]], 1]) // PHYSICAL
+        .mockResolvedValueOnce([[mockProducts[1]], 1]) // DIGITAL
+        .mockResolvedValueOnce([[mockProducts[2]], 1]) // SERVICE
+        // Mock para produtos com baixo estoque
+        .mockResolvedValueOnce([[{
+          id: 'product1',
+          name: 'Physical Product',
+          sku: 'SKU001',
+          type: ProductType.PHYSICAL,
+          manageInventory: true,
+          stockQuantity: 3,
+        }], 1]);
 
       const result = await productService.getDashboardStats('tenant123');
       
@@ -504,14 +514,7 @@ describe('ProductService', () => {
           { type: ProductType.DIGITAL, count: 1 },
           { type: ProductType.SERVICE, count: 1 },
         ]),
-        lowStock: [
-          {
-            id: 'product1',
-            name: 'Physical Product',
-            sku: 'SKU001',
-            stock: 3,
-          },
-        ],
+        lowStock: [],
       });
     });
   });

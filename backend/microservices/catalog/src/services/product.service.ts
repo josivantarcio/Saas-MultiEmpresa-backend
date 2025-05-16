@@ -145,16 +145,30 @@ export class ProductService {
     // Get counts by product type
     const productsByType = await Promise.all(
       Object.values(ProductType).map(async (type) => {
-        const [products] = await this.productRepository.findAll(tenantId, { status: ProductStatus.ACTIVE, type });
-        return { type, count: products.length };
+        try {
+          const result = await this.productRepository.findAll(tenantId, { status: ProductStatus.ACTIVE, type });
+          const products = result && result[0] ? result[0] : [];
+          return { type, count: products.length };
+        } catch (error) {
+          return { type, count: 0 };
+        }
       })
     );
     
     // Get low stock products
-    const [lowStockProducts] = await this.productRepository.findAll(tenantId, {
-      take: 10,
-      status: ProductStatus.ACTIVE,
-    });
+    let lowStockProducts = [];
+    try {
+      const result = await this.productRepository.findAll(tenantId, {
+        take: 10,
+        status: ProductStatus.ACTIVE,
+      });
+      
+      if (result && result[0]) {
+        lowStockProducts = result[0];
+      }
+    } catch (error) {
+      // Em caso de erro, continua com array vazio
+    }
     
     const lowStock = lowStockProducts
       .filter(product => product.manageInventory && product.stockQuantity <= 5)

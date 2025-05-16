@@ -38,8 +38,9 @@ export class ProductRepository {
     categoryId?: string;
     featured?: boolean;
     search?: string;
+    type?: string;
   } = {}): Promise<[Product[], number]> {
-    const { skip = 0, take = 50, status, categoryId, featured, search } = options;
+    const { skip = 0, take = 50, status, categoryId, featured, search, type } = options;
     
     const queryBuilder = this.productRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
@@ -55,6 +56,10 @@ export class ProductRepository {
     
     if (featured !== undefined) {
       queryBuilder.andWhere('product.featured = :featured', { featured });
+    }
+    
+    if (type) {
+      queryBuilder.andWhere('product.type = :type', { type });
     }
     
     if (search) {

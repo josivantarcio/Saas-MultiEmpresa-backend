@@ -95,15 +95,25 @@ describe('CartService', () => {
 
       cartRepository.findByUserId.mockResolvedValue(null);
       cartRepository.findBySessionId.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue({
+        ...mockCart,
+        userId: 'user123',
+      });
 
       const result = await cartService.findOrCreateCart('tenant123', { 
         userId: 'user123', 
         sessionId: 'session123' 
       });
       
-      expect(result).toEqual(mockCart);
+      // Quando um carrinho é encontrado por sessionId e o userId é fornecido,
+      // o serviço atualiza o carrinho com o userId
+      expect(result).toEqual({
+        ...mockCart,
+        userId: 'user123',
+      });
       expect(cartRepository.findByUserId).toHaveBeenCalledWith('user123', 'tenant123');
       expect(cartRepository.findBySessionId).toHaveBeenCalledWith('session123', 'tenant123');
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', { userId: 'user123' });
     });
 
     it('deve atualizar o userId de um carrinho existente quando encontrado por sessionId', async () => {
