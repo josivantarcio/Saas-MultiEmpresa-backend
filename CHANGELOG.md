@@ -2,9 +2,24 @@
 
 Este arquivo documenta todas as alterações significativas feitas no projeto E-commerce SaaS Platform. Sempre que ocorrer implementações ou remoções, este arquivo deve ser atualizado.
 
-## [Não lançado]
+## [v0.6.0] - 2025-05-15
 
 ### Adicionado
+- Implementação completa dos testes unitários para o microserviço de checkout
+  - Testes unitários para CartService (26 testes)
+  - Testes unitários para OrderService (31 testes)
+  - Testes unitários para CheckoutService (18 testes)
+  - Testes unitários para CartController, OrderController e CheckoutController (29 testes)
+  - Total de 104 testes unitários implementados e passando
+  - Verificação da interação correta entre os controladores e seus respectivos serviços
+  - Abordagem com tipagem 'any' para objetos mock para contornar problemas de compatibilidade
+
+### Melhorado
+- Refatoração de código para melhorar testabilidade
+- Isolamento adequado de componentes para testes unitários
+- Melhoria na estrutura de mocks para testes
+
+## [Não lançado]
 - Implementação do microserviço de pagamentos completo
   - Entidades: Payment, Subscription e Transaction
   - Repositórios para gerenciamento de dados

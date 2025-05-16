@@ -559,4 +559,416 @@ describe('OrderService', () => {
       expect(orderRepository.getOrderStats).toHaveBeenCalledWith('tenant123', 'month');
     });
   });
+
+  describe('findAll', () => {
+    it('deve retornar todos os pedidos com os filtros fornecidos', async () => {
+      const mockOrders = [
+        {
+          id: 'order123',
+          tenantId: 'tenant123',
+          status: OrderStatus.PROCESSING,
+        },
+        {
+          id: 'order456',
+          tenantId: 'tenant123',
+          status: OrderStatus.COMPLETED,
+        },
+      ];
+
+      const filters = {
+        skip: 0,
+        take: 10,
+        status: OrderStatus.PROCESSING,
+        paymentStatus: PaymentStatus.PAID,
+        startDate: new Date('2025-01-01'),
+        endDate: new Date('2025-12-31'),
+      };
+
+      orderRepository.findAll.mockResolvedValue([mockOrders, 2]);
+
+      const result = await orderService.findAll('tenant123', filters);
+      
+      expect(result).toEqual({ items: mockOrders, total: 2 });
+      expect(orderRepository.findAll).toHaveBeenCalledWith('tenant123', filters);
+    });
+  });
+
+  describe('createFromCart', () => {
+    it('deve criar um pedido a partir de um carrinho válido', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        userId: 'user123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+            requiresShipping: true,
+          },
+        ],
+        subtotal: 100,
+        taxAmount: 10,
+        discountAmount: 0,
+        shippingAmount: 15,
+        total: 125,
+        shippingAddress: {
+          firstName: 'John',
+          lastName: 'Doe',
+          address1: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          postalCode: '12345',
+          country: 'US',
+        },
+        billingAddress: {
+          firstName: 'John',
+          lastName: 'Doe',
+          address1: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          postalCode: '12345',
+          country: 'US',
+        },
+      };
+
+      const orderData = {
+        customerEmail: 'john.doe@example.com',
+        customerName: 'John Doe',
+        customerPhone: '123-456-7890',
+        paymentMethodId: 'payment123',
+        paymentMethodName: 'Credit Card',
+        notes: 'Please deliver to the front door',
+      };
+
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        userId: 'user123',
+        orderNumber: 'ORD-123456',
+        customerEmail: 'john.doe@example.com',
+        customerName: 'John Doe',
+        customerPhone: '123-456-7890',
+        cartId: 'cart123',
+        status: OrderStatus.PENDING,
+        paymentStatus: PaymentStatus.PENDING,
+        fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
+        subtotal: 100,
+        taxAmount: 10,
+        discountAmount: 0,
+        shippingAmount: 15,
+        total: 125,
+        paymentMethodId: 'payment123',
+        paymentMethodName: 'Credit Card',
+        shippingAddress: mockCart.shippingAddress,
+        billingAddress: mockCart.billingAddress,
+        notes: 'Please deliver to the front door',
+        hasPhysicalItems: true,
+        hasDigitalItems: false,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      orderRepository.create.mockResolvedValue(mockOrder);
+      orderRepository.findById.mockResolvedValue(mockOrder);
+
+      const result = await orderService.createFromCart('cart123', 'tenant123', orderData);
+      
+      expect(result).toEqual(mockOrder);
+      expect(cartRepository.findById).toHaveBeenCalledWith('cart123', 'tenant123');
+      expect(orderRepository.create).toHaveBeenCalledWith(expect.objectContaining({
+        tenantId: 'tenant123',
+        userId: 'user123',
+        customerEmail: 'john.doe@example.com',
+        customerName: 'John Doe',
+        customerPhone: '123-456-7890',
+        cartId: 'cart123',
+        subtotal: 100,
+        taxAmount: 10,
+        discountAmount: 0,
+        shippingAmount: 15,
+        total: 125,
+        paymentMethodId: 'payment123',
+        paymentMethodName: 'Credit Card',
+        shippingAddress: mockCart.shippingAddress,
+        billingAddress: mockCart.billingAddress,
+        notes: 'Please deliver to the front door',
+        hasPhysicalItems: true,
+      }));
+      expect(cartRepository.markAsAbandoned).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+
+    it('deve lançar BadRequestException ao tentar criar um pedido a partir de um carrinho vazio', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        userId: 'user123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      const orderData = {
+        customerEmail: 'john.doe@example.com',
+        customerName: 'John Doe',
+        paymentMethodId: 'payment123',
+        paymentMethodName: 'Credit Card',
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+
+      await expect(
+        orderService.createFromCart('cart123', 'tenant123', orderData)
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('deve lançar BadRequestException ao tentar criar um pedido sem endereço de entrega para itens físicos', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        userId: 'user123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+            requiresShipping: true,
+          },
+        ],
+        subtotal: 100,
+        total: 100,
+        billingAddress: {
+          firstName: 'John',
+          lastName: 'Doe',
+          address1: '123 Main St',
+          city: 'Anytown',
+          state: 'CA',
+          postalCode: '12345',
+          country: 'US',
+        },
+      };
+
+      const orderData = {
+        customerEmail: 'john.doe@example.com',
+        customerName: 'John Doe',
+        paymentMethodId: 'payment123',
+        paymentMethodName: 'Credit Card',
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+
+      await expect(
+        orderService.createFromCart('cart123', 'tenant123', orderData)
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('deve atualizar o status do pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        status: OrderStatus.PENDING,
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        status: OrderStatus.PROCESSING,
+      };
+
+      orderRepository.updateStatus.mockResolvedValue(updatedOrder);
+
+      const result = await orderService.updateStatus('order123', 'tenant123', OrderStatus.PROCESSING);
+      
+      expect(result).toEqual(updatedOrder);
+      expect(orderRepository.updateStatus).toHaveBeenCalledWith('order123', 'tenant123', OrderStatus.PROCESSING);
+    });
+  });
+
+  describe('updatePaymentStatus', () => {
+    it('deve atualizar o status de pagamento do pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        status: OrderStatus.PENDING,
+        paymentStatus: PaymentStatus.PENDING,
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        paymentStatus: PaymentStatus.PAID,
+        paymentTransactionId: 'txn123',
+      };
+
+      orderRepository.updatePaymentStatus.mockResolvedValue(updatedOrder);
+
+      const result = await orderService.updatePaymentStatus('order123', 'tenant123', PaymentStatus.PAID, 'txn123');
+      
+      expect(result).toEqual(updatedOrder);
+      expect(orderRepository.updatePaymentStatus).toHaveBeenCalledWith('order123', 'tenant123', PaymentStatus.PAID, 'txn123');
+    });
+  });
+
+  describe('updateFulfillmentStatus', () => {
+    it('deve atualizar o status de atendimento do pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        status: OrderStatus.PROCESSING,
+        fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        fulfillmentStatus: FulfillmentStatus.FULFILLED,
+      };
+
+      orderRepository.updateFulfillmentStatus.mockResolvedValue(updatedOrder);
+
+      const result = await orderService.updateFulfillmentStatus('order123', 'tenant123', FulfillmentStatus.FULFILLED);
+      
+      expect(result).toEqual(updatedOrder);
+      expect(orderRepository.updateFulfillmentStatus).toHaveBeenCalledWith('order123', 'tenant123', FulfillmentStatus.FULFILLED);
+    });
+  });
+
+  describe('updateOrderItem', () => {
+    it('deve atualizar um item do pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+      };
+
+      const updatedItem = {
+        id: 'item123',
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+        quantity: 2,
+      };
+
+      orderRepository.findById.mockResolvedValue(mockOrder);
+      orderRepository.updateItem.mockResolvedValue(updatedItem);
+
+      const result = await orderService.updateOrderItem('order123', 'item123', 'tenant123', { quantity: 2 });
+      
+      expect(result).toEqual(updatedItem);
+      expect(orderRepository.findById).toHaveBeenCalledWith('order123', 'tenant123');
+      expect(orderRepository.updateItem).toHaveBeenCalledWith('item123', 'order123', { quantity: 2 });
+    });
+  });
+
+  describe('updateOrderItemStatus', () => {
+    it('deve atualizar o status de um item do pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+            status: OrderItemStatus.PENDING,
+          },
+        ],
+      };
+
+      const updatedItem = {
+        id: 'item123',
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+        quantity: 1,
+        status: OrderItemStatus.SHIPPED,
+      };
+
+      orderRepository.findById.mockResolvedValue(mockOrder);
+      orderRepository.updateItemStatus.mockResolvedValue(updatedItem);
+
+      const result = await orderService.updateOrderItemStatus('order123', 'item123', 'tenant123', OrderItemStatus.SHIPPED);
+      
+      expect(result).toEqual(updatedItem);
+      expect(orderRepository.findById).toHaveBeenCalledWith('order123', 'tenant123');
+      expect(orderRepository.updateItemStatus).toHaveBeenCalledWith('item123', 'order123', OrderItemStatus.SHIPPED);
+    });
+  });
+
+  describe('addTrackingInfo', () => {
+    it('deve adicionar informações de rastreamento ao pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        status: OrderStatus.PROCESSING,
+        fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
+      };
+
+      const trackingInfo = {
+        trackingNumber: 'TRK123456',
+        trackingUrl: 'https://tracking.example.com/TRK123456',
+        estimatedDeliveryDate: new Date('2025-05-20'),
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        trackingNumber: 'TRK123456',
+        trackingUrl: 'https://tracking.example.com/TRK123456',
+        estimatedDeliveryDate: new Date('2025-05-20'),
+        fulfillmentStatus: FulfillmentStatus.PARTIALLY_FULFILLED,
+      };
+
+      orderRepository.findById.mockResolvedValue(mockOrder);
+      orderRepository.update.mockResolvedValue(updatedOrder);
+
+      const result = await orderService.addTrackingInfo('order123', 'tenant123', trackingInfo);
+      
+      expect(result).toEqual(updatedOrder);
+      expect(orderRepository.findById).toHaveBeenCalledWith('order123', 'tenant123');
+      expect(orderRepository.update).toHaveBeenCalledWith('order123', 'tenant123', {
+        trackingNumber: 'TRK123456',
+        trackingUrl: 'https://tracking.example.com/TRK123456',
+        estimatedDeliveryDate: new Date('2025-05-20'),
+        fulfillmentStatus: FulfillmentStatus.PARTIALLY_FULFILLED,
+      });
+    });
+  });
+
+  describe('addAdminNotes', () => {
+    it('deve adicionar notas administrativas ao pedido', async () => {
+      const mockOrder = {
+        id: 'order123',
+        tenantId: 'tenant123',
+        status: OrderStatus.PROCESSING,
+      };
+
+      const updatedOrder = {
+        ...mockOrder,
+        adminNotes: 'Contatar cliente antes da entrega',
+      };
+
+      orderRepository.findById.mockResolvedValue(mockOrder);
+      orderRepository.update.mockResolvedValue(updatedOrder);
+
+      const result = await orderService.addAdminNotes('order123', 'tenant123', 'Contatar cliente antes da entrega');
+      
+      expect(result).toEqual(updatedOrder);
+      expect(orderRepository.findById).toHaveBeenCalledWith('order123', 'tenant123');
+      expect(orderRepository.update).toHaveBeenCalledWith('order123', 'tenant123', {
+        adminNotes: 'Contatar cliente antes da entrega',
+      });
+    });
+  });
 });

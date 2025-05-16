@@ -434,4 +434,386 @@ describe('CartService', () => {
       expect(cartRepository.findAbandoned).toHaveBeenCalledWith('tenant123', { hours: 24 });
     });
   });
+
+  describe('addItem', () => {
+    it('deve adicionar um item ao carrinho e recalcular totais', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        total: 100,
+      };
+
+      const itemData = {
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.addItem.mockResolvedValue(undefined);
+      cartRepository.calculateTotals.mockResolvedValue(updatedCart);
+
+      const result = await cartService.addItem('cart123', 'tenant123', itemData);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.addItem).toHaveBeenCalledWith('cart123', expect.objectContaining({
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+        quantity: 1,
+      }));
+      expect(cartRepository.calculateTotals).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+
+    it('deve adicionar um item com atributos personalizados', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 2,
+            attributes: { color: 'red', size: 'M' },
+            isDigital: true,
+          },
+        ],
+        subtotal: 200,
+        total: 200,
+      };
+
+      const itemData = {
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+        quantity: 2,
+        attributes: { color: 'red', size: 'M' },
+        isDigital: true,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.addItem.mockResolvedValue(undefined);
+      cartRepository.calculateTotals.mockResolvedValue(updatedCart);
+
+      const result = await cartService.addItem('cart123', 'tenant123', itemData);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.addItem).toHaveBeenCalledWith('cart123', expect.objectContaining({
+        productId: 'product123',
+        name: 'Test Product',
+        price: 100,
+        quantity: 2,
+        attributes: { color: 'red', size: 'M' },
+        isDigital: true,
+      }));
+    });
+  });
+
+  describe('clearCart', () => {
+    it('deve limpar todos os itens do carrinho e recalcular totais', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        total: 100,
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.clearItems.mockResolvedValue(undefined);
+      cartRepository.calculateTotals.mockResolvedValue(updatedCart);
+
+      const result = await cartService.clearCart('cart123', 'tenant123');
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.clearItems).toHaveBeenCalledWith('cart123');
+      expect(cartRepository.calculateTotals).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
+
+  describe('updateCart', () => {
+    it('deve atualizar os dados do carrinho', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+        metadata: {},
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+        metadata: { source: 'mobile' },
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue(updatedCart);
+
+      const result = await cartService.updateCart('cart123', 'tenant123', { metadata: { source: 'mobile' } });
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', { metadata: { source: 'mobile' } });
+    });
+  });
+
+  describe('applyShipping', () => {
+    it('deve aplicar método de envio ao carrinho e recalcular totais', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        shippingAmount: 0,
+        total: 100,
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        shippingAmount: 15,
+        shippingMethodId: 'shipping123',
+        total: 115,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue({ ...mockCart, shippingMethodId: 'shipping123', shippingAmount: 15 });
+      cartRepository.calculateTotals.mockResolvedValue(updatedCart);
+
+      const result = await cartService.applyShipping('cart123', 'tenant123', 'shipping123', 15);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', {
+        shippingMethodId: 'shipping123',
+        shippingAmount: 15,
+      });
+      expect(cartRepository.calculateTotals).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
+
+  describe('applyCoupon', () => {
+    it('deve aplicar cupom ao carrinho e recalcular totais', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        discountAmount: 0,
+        total: 100,
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [
+          {
+            id: 'item123',
+            productId: 'product123',
+            name: 'Test Product',
+            price: 100,
+            quantity: 1,
+          },
+        ],
+        subtotal: 100,
+        discountAmount: 10,
+        couponCode: 'DESCONTO10',
+        total: 90,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue({ ...mockCart, couponCode: 'DESCONTO10', discountAmount: 10 });
+      cartRepository.calculateTotals.mockResolvedValue(updatedCart);
+
+      const result = await cartService.applyCoupon('cart123', 'tenant123', 'DESCONTO10', 10);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', {
+        couponCode: 'DESCONTO10',
+        discountAmount: 10,
+      });
+      expect(cartRepository.calculateTotals).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
+
+  describe('setShippingAddress', () => {
+    it('deve definir o endereço de entrega do carrinho', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      const shippingAddress = {
+        firstName: 'John',
+        lastName: 'Doe',
+        address1: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        postalCode: '12345',
+        country: 'US',
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+        shippingAddress,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue(updatedCart);
+
+      const result = await cartService.setShippingAddress('cart123', 'tenant123', shippingAddress);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', { shippingAddress });
+    });
+  });
+
+  describe('setBillingAddress', () => {
+    it('deve definir o endereço de cobrança do carrinho', async () => {
+      const mockCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+      };
+
+      const billingAddress = {
+        firstName: 'John',
+        lastName: 'Doe',
+        address1: '123 Main St',
+        city: 'Anytown',
+        state: 'CA',
+        postalCode: '12345',
+        country: 'US',
+      };
+
+      const updatedCart = {
+        id: 'cart123',
+        tenantId: 'tenant123',
+        items: [],
+        subtotal: 0,
+        total: 0,
+        billingAddress,
+      };
+
+      cartRepository.findById.mockResolvedValue(mockCart);
+      cartRepository.update.mockResolvedValue(updatedCart);
+
+      const result = await cartService.setBillingAddress('cart123', 'tenant123', billingAddress);
+      
+      expect(result).toEqual(updatedCart);
+      expect(cartRepository.update).toHaveBeenCalledWith('cart123', 'tenant123', { billingAddress });
+    });
+  });
+
+  describe('markCartAsAbandoned', () => {
+    it('deve marcar o carrinho como abandonado', async () => {
+      cartRepository.markAsAbandoned.mockResolvedValue(undefined);
+
+      await cartService.markCartAsAbandoned('cart123', 'tenant123');
+      
+      expect(cartRepository.markAsAbandoned).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
+
+  describe('updateLastNotification', () => {
+    it('deve atualizar a data da última notificação do carrinho', async () => {
+      cartRepository.updateLastNotification.mockResolvedValue(undefined);
+
+      await cartService.updateLastNotification('cart123', 'tenant123');
+      
+      expect(cartRepository.updateLastNotification).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
+
+  describe('deleteCart', () => {
+    it('deve excluir o carrinho', async () => {
+      cartRepository.remove.mockResolvedValue(undefined);
+
+      await cartService.deleteCart('cart123', 'tenant123');
+      
+      expect(cartRepository.remove).toHaveBeenCalledWith('cart123', 'tenant123');
+    });
+  });
 });

@@ -1,13 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-
-// Importação temporária até que o authSlice seja implementado
-const authReducer = (state = { user: null, token: null, isAuthenticated: false }, action: any) => {
-  switch (action.type) {
-    default:
-      return state;
-  }
-};
+import authReducer from './features/auth/authSlice';
 
 export const store = configureStore({
   reducer: {
