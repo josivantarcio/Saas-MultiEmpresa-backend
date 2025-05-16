@@ -59,7 +59,7 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
   - Controladores para endpoints da API
 
 ### Próximos Passos
-1. Implementar testes unitários e de integração para os demais microserviços
+1. ~~Implementar testes unitários e de integração para os demais microserviços~~ (Concluído: Implementação de testes para os microserviços de auth, catalog e checkout)
 2. ~~Iniciar o desenvolvimento do frontend com Next.js~~ (Concluído: Implementação das interfaces merchant-portal, admin-portal e storefront)
 3. Implementar a integração entre os microserviços
 4. Configurar o ambiente de produção no Render (backend) e Vercel (frontend)
