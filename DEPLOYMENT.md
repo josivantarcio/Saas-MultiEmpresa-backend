@@ -197,6 +197,17 @@ docker exec -it saas_ecommerce_mongodb_prod mongo -u mongodb -p mongodb
 docker stats
 ```
 
+## Deploy em Produção
+
+### Documentação da API (Swagger)
+
+Cada microserviço expõe sua documentação OpenAPI/Swagger em `/docs`.
+
+- Exemplo: `http://localhost:3001/docs` para o Auth Service
+- Use esse endpoint para explorar, testar e integrar as APIs.
+
+### Backend no Render
+
 ## Segurança
 
 - **Nunca** exponha portas de banco de dados diretamente para a internet

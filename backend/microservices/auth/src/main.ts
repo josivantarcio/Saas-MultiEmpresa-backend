@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import * as helmet from 'helmet';
 import * as compression from 'compression';
 import { AuthModule } from './auth.module';
+import logger from './logger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AuthModule);
@@ -33,9 +35,19 @@ async function bootstrap() {
   
   // Set API prefix
   app.setGlobalPrefix(apiPrefix);
-  
+
+  // Swagger/OpenAPI setup
+  const config = new DocumentBuilder()
+    .setTitle('Auth API')
+    .setDescription('Documentação da API de autenticação')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
   await app.listen(port);
-  console.log(`Auth service running on port ${port}`);
+  logger.info(`Auth service running on port ${port} - Swagger disponível em /docs`);
 }
 
 bootstrap();

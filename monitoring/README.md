@@ -149,3 +149,70 @@ Edite o arquivo `monitoring/grafana/provisioning/datasources/datasource.yml` par
 2. Adicionar métricas personalizadas aos serviços
 3. Configurar autenticação OAuth para o Grafana
 4. Adicionar mais painéis para métricas específicas de negócio
+
+## Backup automático dos bancos de dados
+
+Scripts de backup estão disponíveis na pasta `monitoring`:
+
+- `backup-postgres.sh`: backup do PostgreSQL para um arquivo `.sql`.
+- `backup-mongodb.sh`: backup do MongoDB para um arquivo `.tar.gz`.
+
+### Como usar
+
+**Backup PostgreSQL:**
+```sh
+./monitoring/backup-postgres.sh <nome_banco> <usuario> <senha> <host> <porta>
+# Exemplo (localhost, padrão):
+./monitoring/backup-postgres.sh saas_ecommerce postgres postgres localhost 5432
+```
+
+**Backup MongoDB:**
+```sh
+./monitoring/backup-mongodb.sh <usuario> <senha> <host> <porta> <database>
+# Exemplo (localhost, padrão):
+./monitoring/backup-mongodb.sh mongodb mongodb localhost 27017 saas_ecommerce
+```
+
+Os arquivos de backup serão salvos em `./backups/postgres` e `./backups/mongodb`.
+
+### Como restaurar
+
+**PostgreSQL:**
+```sh
+psql -h <host> -U <usuario> -d <nome_banco> -f <arquivo.sql>
+```
+
+**MongoDB:**
+```sh
+tar -xzf <arquivo.tar.gz> -C ./backups/mongodb
+mongorestore --host <host> --port <porta> -u <usuario> -p <senha> --db <database> ./backups/mongodb/<database>_<data>
+```
+
+---
+
+## Análise dos testes de carga e otimização de performance
+
+Após rodar os testes de carga com k6, observe os seguintes indicadores no relatório:
+- **avg**: tempo médio de resposta
+- **min/max**: menor e maior tempo de resposta
+- **http_reqs**: número total de requisições
+- **vus**: usuários virtuais simultâneos
+- **http_req_failed**: percentual de falhas
+
+### Como interpretar
+- Tempos de resposta altos ou muitos erros indicam gargalos no serviço ou infraestrutura.
+- Aumente gradualmente o número de usuários virtuais para identificar o ponto de saturação.
+
+### Recomendações de otimização
+- **Ajuste limites de recursos** no `docker-compose.prod.yml` usando `deploy.resources` para CPU/memória.
+- **Implemente cache** (Redis) para dados frequentemente acessados.
+- **Ajuste pool de conexões** do banco de dados para suportar mais requisições simultâneas.
+- **Escalabilidade horizontal:** Considere rodar múltiplas réplicas dos microserviços críticos.
+- **Monitore logs e métricas** em tempo real via Grafana para identificar padrões de lentidão.
+
+### Exemplo de comando para rodar teste com mais carga
+```sh
+k6 run --vus 50 --duration 1m monitoring/load-test-auth.js
+```
+
+Documente os resultados e ajuste os recursos conforme necessário para garantir alta performance em produção.

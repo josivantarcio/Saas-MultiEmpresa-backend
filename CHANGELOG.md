@@ -94,11 +94,16 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
 1. ~~Implementar testes unitários e de integração para os demais microserviços~~ (Concluído: Implementação de testes para os microserviços de auth, catalog e checkout)
 2. ~~Iniciar o desenvolvimento do frontend com Next.js~~ (Concluído: Implementação das interfaces merchant-portal, admin-portal e storefront)
 3. ~~Implementar a integração entre os microserviços~~ (Concluído: Implementação do API Gateway e sistema de comunicação entre serviços)
-4. Configurar o ambiente de produção no Render (backend) e Vercel (frontend)
-5. Implementar monitoramento e logging
-6. Realizar testes de carga e otimização de performance
-7. Implementar documentação da API com Swagger
-8. Configurar backup automático dos bancos de dados
+4. ~~Configurar o ambiente de produção no Render (backend) e Vercel (frontend)~~
+   - Concluído: Criado `docker-compose.prod.yml`, atualizado `DEPLOYMENT.md` com instruções detalhadas para Render e Vercel, e revisadas variáveis de ambiente para produção.
+5. ~~Implementar monitoramento e logging~~
+   - Concluído: Infraestrutura com Prometheus, Grafana, Alertmanager, Loki, Promtail, Blackbox Exporter. Logging estruturado com Winston e integração com Loki/Promtail documentada.
+6. ~~Realizar testes de carga e otimização de performance~~
+   - Concluído: Scripts de teste de carga com k6 para todos os microserviços, documentação de análise de resultados e recomendações de performance.
+7. ~~Implementar documentação da API com Swagger~~
+   - Concluído: Swagger disponível em `/docs` para o Auth Service (NestJS), instruções de acesso adicionadas ao `DEPLOYMENT.md`.
+8. ~~Configurar backup automático dos bancos de dados~~
+   - Concluído: Scripts automatizados para backup de PostgreSQL e MongoDB, com instruções de uso e restauração no `monitoring/README.md`.
 
 ## Instruções para Contribuição
 

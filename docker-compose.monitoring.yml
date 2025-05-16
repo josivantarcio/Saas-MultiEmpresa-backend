@@ -51,41 +51,36 @@ services:
       timeout: 10s
       retries: 3
 
-  # Node Exporter - Coleta métricas do host
+  # Node Exporter - Coleta métricas do host (adaptado para Windows)
   node-exporter:
     image: prom/node-exporter:latest
     container_name: saas_ecommerce_node_exporter
     restart: unless-stopped
-    command:
-      - '--path.rootfs=/host'
-    pid: host
-    volumes:
-      - '/:/host:ro,rslave'
     ports:
       - "9100:9100"
     networks:
       - monitoring_network
 
-  # cAdvisor - Monitoramento de contêineres
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: saas_ecommerce_cadvisor
-    restart: unless-stopped
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    ports:
-      - "8080:8080"
-    networks:
-      - monitoring_network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:8080/healthz"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # cAdvisor - Monitoramento de contêineres (comentado para Windows)
+  # cadvisor:
+  #   image: gcr.io/cadvisor/cadvisor:latest
+  #   container_name: saas_ecommerce_cadvisor
+  #   restart: unless-stopped
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - monitoring_network
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--spider", "http://localhost:8080/healthz"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
   # Prometheus Blackbox Exporter - Monitoramento de endpoints HTTP/HTTPS
   blackbox-exporter:
@@ -160,64 +155,55 @@ services:
     depends_on:
       - loki
 
-  # Redis Exporter - Métricas do Redis
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: saas_ecommerce_redis_exporter
-    restart: unless-stopped
-    environment:
-      - REDIS_ADDR=redis:6379
-    ports:
-      - "9121:9121"
-    networks:
-      - monitoring_network
-    depends_on:
-      - redis
+  # Redis Exporter - Métricas do Redis (comentado até que o serviço Redis esteja disponível)
+  # redis-exporter:
+  #   image: oliver006/redis_exporter:latest
+  #   container_name: saas_ecommerce_redis_exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     - REDIS_ADDR=redis:6379
+  #   ports:
+  #     - "9121:9121"
+  #   networks:
+  #     - monitoring_network
 
-  # MongoDB Exporter - Métricas do MongoDB
-  mongodb-exporter:
-    image: percona/mongodb_exporter:latest
-    container_name: saas_ecommerce_mongodb_exporter
-    restart: unless-stopped
-    environment:
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-mongodb}:${MONGO_INITDB_ROOT_PASSWORD:-mongodb}@mongodb:27017/admin
-    ports:
-      - "9216:9216"
-    networks:
-      - monitoring_network
-    depends_on:
-      - mongodb
+  # MongoDB Exporter - Métricas do MongoDB (comentado até que o serviço MongoDB esteja disponível)
+  # mongodb-exporter:
+  #   image: percona/mongodb_exporter:latest
+  #   container_name: saas_ecommerce_mongodb_exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-mongodb}:${MONGO_INITDB_ROOT_PASSWORD:-mongodb}@mongodb:27017/admin
+  #   ports:
+  #     - "9216:9216"
+  #   networks:
+  #     - monitoring_network
 
-  # PostgreSQL Exporter - Métricas do PostgreSQL
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:latest
-    container_name: saas_ecommerce_postgres_exporter
-    restart: unless-stopped
-    environment:
-      - DATA_SOURCE_NAME=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/postgres?sslmode=disable
-    ports:
-      - "9187:9187"
-    networks:
-      - monitoring_network
-    depends_on:
-      - postgres
+  # PostgreSQL Exporter - Métricas do PostgreSQL (comentado até que o serviço PostgreSQL esteja disponível)
+  # postgres-exporter:
+  #   image: prometheuscommunity/postgres-exporter:latest
+  #   container_name: saas_ecommerce_postgres_exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     - DATA_SOURCE_NAME=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/postgres?sslmode=disable
+  #   ports:
+  #     - "9187:9187"
+  #   networks:
+  #     - monitoring_network
 
-  # RabbitMQ Exporter - Métricas do RabbitMQ
-  rabbitmq-exporter:
-    image: kbudde/rabbitmq-exporter:latest
-    container_name: saas_ecommerce_rabbitmq_exporter
-    restart: unless-stopped
-    environment:
-      - PUBLISH_PORT=9090
-      - RABBIT_URL=http://rabbitmq:15672
-      - RABBIT_USER=${RABBITMQ_DEFAULT_USER:-rabbitmq}
-      - RABBIT_PASSWORD=${RABBITMQ_DEFAULT_PASS:-rabbitmq}
-    ports:
-      - "9092:9090"
-    networks:
-      - monitoring_network
-    depends_on:
-      - rabbitmq
+  # RabbitMQ Exporter - Métricas do RabbitMQ (comentado até que o serviço RabbitMQ esteja disponível)
+  # rabbitmq-exporter:
+  #   image: kbudde/rabbitmq-exporter
+  #   container_name: saas_ecommerce_rabbitmq_exporter
+  #   restart: unless-stopped
+  #   environment:
+  #     - RABBIT_URL=http://rabbitmq:15672
+  #     - RABBIT_USER=${RABBITMQ_DEFAULT_USER:-rabbitmq}
+  #     - RABBIT_PASSWORD=${RABBITMQ_DEFAULT_PASS:-rabbitmq}
+  #   ports:
+  #     - "9419:9419"
+  #   networks:
+  #     - monitoring_network
 
 networks:
   monitoring_network:
