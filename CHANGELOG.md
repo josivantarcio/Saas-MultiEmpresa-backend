@@ -2,6 +2,23 @@
 
 Este arquivo documenta todas as alterações significativas feitas no projeto E-commerce SaaS Platform. Sempre que ocorrer implementações ou remoções, este arquivo deve ser atualizado.
 
+## [v0.7.0] - 2025-06-15
+
+### Adicionado
+- Implementação da integração entre os microserviços
+  - API Gateway para centralizar requisições e autenticação
+  - Sistema de comunicação HTTP entre serviços
+  - Sistema de eventos baseado em RabbitMQ para comunicação assíncrona
+  - Integração do serviço de autenticação com os outros microserviços
+  - Integração do serviço de catálogo com o serviço de checkout
+  - Integração do serviço de checkout com o serviço de pagamentos
+  - Tratamento de falhas e resiliência na comunicação entre serviços
+
+### Melhorado
+- Refatoração dos serviços para utilizar o módulo de comunicação compartilhado
+- Implementação de padrões de comunicação entre serviços
+- Adição de logs para monitoramento da comunicação entre serviços
+
 ## [v0.6.0] - 2025-05-15
 
 ### Adicionado
@@ -76,7 +93,7 @@ Este arquivo documenta todas as alterações significativas feitas no projeto E-
 ### Próximos Passos
 1. ~~Implementar testes unitários e de integração para os demais microserviços~~ (Concluído: Implementação de testes para os microserviços de auth, catalog e checkout)
 2. ~~Iniciar o desenvolvimento do frontend com Next.js~~ (Concluído: Implementação das interfaces merchant-portal, admin-portal e storefront)
-3. Implementar a integração entre os microserviços
+3. ~~Implementar a integração entre os microserviços~~ (Concluído: Implementação do API Gateway e sistema de comunicação entre serviços)
 4. Configurar o ambiente de produção no Render (backend) e Vercel (frontend)
 5. Implementar monitoramento e logging
 6. Realizar testes de carga e otimização de performance

@@ -1,0 +1,91 @@
+groups:
+- name: application.rules
+  rules:
+    # Regra para monitorar a taxa de erros HTTP
+    - record: http_requests:rate5m
+      expr: rate(http_requests_total[5m])
+    
+    # Regra para monitorar a latência média das requisições
+    - record: http_request_duration_seconds:rate5m
+      expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m])
+    
+    # Regra para monitorar o uso de memória da aplicação
+    - record: app_memory_usage_bytes:rate5m
+      expr: rate(process_resident_memory_bytes[5m])
+    
+    # Regra para monitorar o uso de CPU da aplicação
+    - record: app_cpu_usage_seconds:rate5m
+      expr: rate(process_cpu_seconds_total[5m])
+
+- name: business.rules
+  rules:
+    # Regra para monitorar o número de pedidos por minuto
+    - record: orders:rate5m
+      expr: sum(rate(orders_created_total[5m])) by (service)
+    
+    # Regra para monitorar o valor médio dos pedidos
+    - record: orders:avg_value
+      expr: sum(rate(orders_total_amount_sum[5m])) by (service) / sum(rate(orders_total_amount_count[5m])) by (service)
+    
+    # Regra para monitorar a taxa de conversão
+    - record: conversion:rate
+      expr: sum(rate(orders_created_total[1h])) by (service) / sum(rate(cart_viewed_total[1h])) by (service)
+
+- name: infrastructure.rules
+  rules:
+    # Regra para monitorar a saúde dos serviços
+    - record: service_health
+      expr: up
+    
+    # Regra para monitorar o tempo de resposta dos serviços
+    - record: service_response_time
+      expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m])
+    
+    # Regra para monitorar a taxa de erros dos serviços
+    - record: service_error_rate
+      expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (service) / sum(rate(http_requests_total[5m])) by (service)
+
+- name: database.rules
+  rules:
+    # Regra para monitorar consultas lentas
+    - record: db_query_duration_seconds:rate5m
+      expr: rate(db_query_duration_seconds_sum[5m]) / rate(db_query_duration_seconds_count[5m])
+    
+    # Regra para monitorar conexões ativas
+    - record: db_connections_active
+      expr: pg_stat_activity_count
+    
+    # Regra para monitorar bloqueios
+    - record: db_locks_count
+      expr: pg_locks_count
+
+- name: cache.rules
+  rules:
+    # Regra para monitorar taxa de acertos no cache
+    - record: cache_hit_ratio
+      expr: rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))
+    
+    # Regra para monitorar uso de memória do Redis
+    - record: redis_memory_usage_bytes
+      expr: redis_memory_used_bytes / redis_memory_max_bytes
+
+- name: queue.rules
+  rules:
+    # Regra para monitorar o tamanho das filas
+    - record: queue_messages
+      expr: rabbitmq_queue_messages
+    
+    # Regra para monitorar a taxa de consumo
+    - record: queue_consumption_rate
+      expr: rate(rabbitmq_queue_messages_acknowledged[5m])
+
+- name: alert.rules
+  rules:
+    # Regra para Dead Man's Switch
+    - alert: DeadMansSwitch
+      expr: vector(1)
+      labels:
+        severity: none
+      annotations:
+        description: This is a Dead Man's Switch to ensure that the Alertmanager is working correctly.
+        summary: Alertmanager DeadMansSwitch

@@ -1,0 +1,84 @@
+modules:
+  http_2xx:
+    prober: http
+    http:
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: true
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+  tcp_connect:
+    prober: tcp
+  pop3s_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^\+OK"
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+  ssh_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - expect: "^SSH-2.0-.*"
+  irc_banner:
+    prober: tcp
+    tcp:
+      query_response:
+      - send: "NICK prober"
+      - send: "USER prober prober prober :prober"
+      - expect: "PING :(.*)"
+        send: "PONG ${1}"
+      - expect: ":prober"
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+  
+  # Configuração para monitorar endpoints HTTP/HTTPS
+  http_api_health:
+    prober: http
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200, 201, 204]
+      method: GET
+      headers:
+        Content-Type: application/json
+        Accept: application/json
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: true
+      fail_if_not_ssl: false
+      fail_if_not_matches_regexp:
+        - '\"status\":\"(?:up|healthy)\"'
+
+  # Configuração para verificar se um site está ativo
+  http_2xx_ssl_verify:
+    prober: http
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      method: GET
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: false
+      fail_if_not_ssl: true
+      fail_if_not_matches_regexp:
+        - "<title>.*</title>"
+
+  # Configuração para verificar se um serviço está retornando JSON
+  http_json_rpc:
+    prober: http
+    http:
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1}'
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: true
+      fail_if_not_matches_regexp:
+        - '\"jsonrpc\":\"2.0\"'

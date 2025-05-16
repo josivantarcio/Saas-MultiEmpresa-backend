@@ -1,0 +1,125 @@
+# Configuração do cAdvisor
+# Este arquivo contém as configurações para o cAdvisor
+
+# Configuração do armazenamento
+storage_driver: ""
+storage_driver_host: ""
+storage_driver_user: ""
+storage_driver_password: ""
+storage_driver_secure: false
+storage_driver_buffer_duration: 60s
+storage_driver_db_name: "cadvisor"
+storage_driver_table: "stats"
+
+# Configuração de coleta
+housekeeping_interval: 10s
+max_housekeeping_interval: 1m
+global_housekeeping_interval: 1m
+allow_dynamic_housekeeping: true
+
+# Configuração de armazenamento em disco
+storage_duration: 2h0m0s
+
+# Configuração de métricas
+disable_metrics: ""
+enable_metrics: ""
+
+# Configuração de coleta de disco
+disk_stats_metrics: ""
+enable_load_reader: false
+
+# Configuração de rede
+listen_ip: ""
+port: 8080
+max_procs: 0
+
+# Configuração de TLS
+tls_cert_file: ""
+tls_key_file: ""
+tls_client_ca_file: ""
+
+# Configuração de autenticação HTTP
+http_auth_file: ""
+http_auth_realm: "cAdvisor"
+http_auth_htpasswd: ""
+
+# Configuração de cabeçalhos HTTP
+http_request_header_whitelist: ""
+http_request_header_blacklist: ""
+
+# Configuração de CORS
+allow_cross_origin: false
+
+# Configuração de log
+log_dir: ""
+logtostderr: true
+stderrthreshold: 0
+v: 0
+vmodule: ""
+log_backtrace_at: ""
+logtostdout: false
+alertlogtostderr: false
+log_compress: false
+skip_headers: false
+add_dir_header: false
+
+# Configuração de perfis
+profiling: false
+contention_profiling: false
+
+# Configuração de coleta de perfis
+enable_profiling: false
+profiling_http: ""
+profiling_pprof: ""
+profiling_block_rate: 0
+profiling_mutex_fraction: 0
+
+# Configuração de rastreamento
+trace: ""
+trace_sample_rate: 0
+
+# Configuração de coleta de CPU
+perf_events_config: ""
+perf_events_events: ""
+perf_events_interval: 0
+perf_events_mode: ""
+perf_events_path: ""
+perf_events_timeout: 0
+
+# Configuração de coleta de memória
+memory_usage_interval: 0s
+memory_usage_max_usage: 0
+memory_usage_failcnt: 0
+memory_usage_limit: 0
+memory_usage_soft_limit: 0
+memory_usage_swap_limit: 0
+memory_usage_kernel_limit: 0
+memory_usage_kernel_tcp_limit: 0
+memory_usage_oom_kill_disable: false
+memory_usage_oom_kill_disable_priority: 0
+memory_usage_swappiness: 0
+
+# Configuração de coleta de E/S
+blkio_weight: 0
+blkio_weight_device: ""
+blkio_throttle_read_bps_device: ""
+blkio_throttle_write_bps_device: ""
+blkio_throttle_read_iops_device: ""
+blkio_throttle_write_iops_device: ""
+
+# Configuração de coleta de rede
+network_plugin_name: ""
+network_plugin_mtu: 0
+network_plugin_bin_dir: ""
+network_plugin_conf_dir: ""
+network_plugin_cache_dir: ""
+
+# Configuração de coleta de sistema de arquivos
+filesystem_usage: ""
+filesystem_limit: 0
+filesystem_reservation: ""
+
+# Configuração de coleta de processos
+process_metrics: false
+process_metrics_whitelist: ""
+process_metrics_blacklist: ""

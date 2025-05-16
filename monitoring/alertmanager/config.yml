@@ -1,0 +1,86 @@
+global:
+  # O remetente padrão de e-mail
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alertmanager@example.com'
+  smtp_auth_username: 'alertmanager@example.com'
+  smtp_auth_password: 'your-password'
+  smtp_require_tls: true
+
+# Modelos para notificações
+templates:
+  - '/etc/alertmanager/template/*.tmpl'
+
+# Roteamento de alertas
+route:
+  # O agrupamento de alertas
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  
+  # Rota padrão - notifica o time de SRE
+  receiver: 'sre-team'
+  
+  # Sobrescreve para rotas específicas
+  routes:
+    # Alertas de alta prioridade vão para o time de SRE e para o canal de emergência
+    - match:
+        severity: 'critical'
+      receiver: 'sre-team'
+      continue: true
+      routes:
+        - match:
+            alertname: 'DeadMansSwitch'
+          receiver: 'null'
+    
+    # Alertas de banco de dados vão para o time de banco de dados
+    - match:
+        team: 'database'
+      receiver: 'database-team'
+    
+    # Alertas de aplicação vão para o time de desenvolvimento
+    - match:
+        team: 'app'
+      receiver: 'app-team'
+
+# Configuração dos destinatários
+receivers:
+  # Configuração para o time de SRE
+  - name: 'sre-team'
+    email_configs:
+      - to: 'sre@example.com'
+        send_resolved: true
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/...'
+        channel: '#alerts-critical'
+        send_resolved: true
+        title: '{{ template "slack.default.title" . }}'
+        text: '{{ template "slack.default.text" . }}'
+        title_link: '{{ template "slack.default.titlelink" . }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+  
+  # Configuração para o time de banco de dados
+  - name: 'database-team'
+    email_configs:
+      - to: 'database-team@example.com'
+        send_resolved: true
+    webhook_configs:
+      - url: 'http://database-alerts-handler/send'
+        send_resolved: true
+  
+  # Configuração para o time de aplicação
+  - name: 'app-team'
+    email_configs:
+      - to: 'app-team@example.com'
+        send_resolved: true
+    pagerduty_configs:
+      - routing_key: 'your-pagerduty-key'
+        description: '{{ .CommonAnnotations.summary }}'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          resolved: '{{ .Alerts.Resolved | len }}'
+          num_firing: '{{ .Alerts.Firing | len }}'
+          num_resolved: '{{ .Alerts.Resolved | len }}'
+  
+  # Receptor nulo para alertas que não precisam de notificação
+  - name: 'null'

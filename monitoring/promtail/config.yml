@@ -1,0 +1,96 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Logs de contêineres Docker
+  - job_name: docker
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: docker-logs
+          __path__: /var/lib/docker/containers/*/*-json.log
+    pipeline_stages:
+      - json:
+          expressions:
+            stream: stream
+            log: log
+            time: time
+      - labels:
+          stream:
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+      - output:
+          source: log
+
+  # Logs de aplicações
+  - job_name: applications
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: app-logs
+          __path__: /var/log/applications/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) (?P<level>\w+) \[(?P<thread>.*?)\] (?P<logger>\S+) : (?P<message>.*)'
+      - timestamp:
+          source: timestamp
+          format: 2006-01-02 15:04:05,000
+          location: "UTC"
+      - labels:
+          level:
+          logger:
+      - output:
+          source: message
+
+  # Logs do sistema
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: syslog
+          __path__: /var/log/syslog
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\w+\s+\d+\s+\d+:\d+:\d+)\s+(?P<hostname>\S+)\s+(?P<app>\w+)(?:\[(?P<pid>\d+)\])?:\s+(?P<message>.*)'
+      - timestamp:
+          source: timestamp
+          format: Jan _2 15:04:05
+          location: "UTC"
+      - labels:
+          app:
+          hostname:
+      - output:
+          source: message
+
+  # Logs de acesso HTTP
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx-access
+          __path__: /var/log/nginx/access.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<ip>\S+) \S+ \S+ \[(?P<timestamp>[\w:/]+\s[+\-]\d{4})\] "(?P<method>\S+)\s?(?P<uri>\S+)?\s?(?P<protocol>\S+)?" (?P<status>\d{3}|-) (?P<size>\d+|-)\s?"?(?P<referer>[^"]*)"?\s?"?(?P<user_agent>[^"]*)?"?\s?"?(?P<forwarded_for>[^"]*)?"?$'
+      - timestamp:
+          source: timestamp
+          format: "02/Jan/2006:15:04:05 -0700"
+          location: "UTC"
+      - labels:
+          method:
+          status:
+          uri:
+      - output:
+          source: message

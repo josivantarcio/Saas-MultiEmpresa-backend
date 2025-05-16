@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # Prometheus - Coleta e armazena métricas
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: saas_ecommerce_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Grafana - Visualização de métricas
+  grafana:
+    image: grafana/grafana:latest
+    container_name: saas_ecommerce_grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Node Exporter - Coleta métricas do host
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: saas_ecommerce_node_exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    volumes:
+      - '/:/host:ro,rslave'
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring_network
+
+  # cAdvisor - Monitoramento de contêineres
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: saas_ecommerce_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - monitoring_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Blackbox Exporter - Monitoramento de endpoints HTTP/HTTPS
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    container_name: saas_ecommerce_blackbox_exporter
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/blackbox/config.yml:/etc/blackbox_exporter/config.yml
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    ports:
+      - "9115:9115"
+    networks:
+      - monitoring_network
+
+  # Prometheus Pushgateway - Para métricas de jobs em lote
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: saas_ecommerce_pushgateway
+    restart: unless-stopped
+    command:
+      - '--persistence.file=/pushgateway/data'
+      - '--persistence.interval=5m'
+    ports:
+      - "9091:9091"
+    volumes:
+      - pushgateway_data:/pushgateway/data
+    networks:
+      - monitoring_network
+
+  # Alertmanager - Gerenciamento de alertas
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: saas_ecommerce_alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring_network
+
+  # Loki - Coleta de logs
+  loki:
+    image: grafana/loki:latest
+    container_name: saas_ecommerce_loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+    networks:
+      - monitoring_network
+
+  # Promtail - Coletor de logs para Loki
+  promtail:
+    image: grafana/promtail:latest
+    container_name: saas_ecommerce_promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail/config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring_network
+    depends_on:
+      - loki
+
+  # Redis Exporter - Métricas do Redis
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: saas_ecommerce_redis_exporter
+    restart: unless-stopped
+    environment:
+      - REDIS_ADDR=redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - monitoring_network
+    depends_on:
+      - redis
+
+  # MongoDB Exporter - Métricas do MongoDB
+  mongodb-exporter:
+    image: percona/mongodb_exporter:latest
+    container_name: saas_ecommerce_mongodb_exporter
+    restart: unless-stopped
+    environment:
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-mongodb}:${MONGO_INITDB_ROOT_PASSWORD:-mongodb}@mongodb:27017/admin
+    ports:
+      - "9216:9216"
+    networks:
+      - monitoring_network
+    depends_on:
+      - mongodb
+
+  # PostgreSQL Exporter - Métricas do PostgreSQL
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: saas_ecommerce_postgres_exporter
+    restart: unless-stopped
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/postgres?sslmode=disable
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring_network
+    depends_on:
+      - postgres
+
+  # RabbitMQ Exporter - Métricas do RabbitMQ
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter:latest
+    container_name: saas_ecommerce_rabbitmq_exporter
+    restart: unless-stopped
+    environment:
+      - PUBLISH_PORT=9090
+      - RABBIT_URL=http://rabbitmq:15672
+      - RABBIT_USER=${RABBITMQ_DEFAULT_USER:-rabbitmq}
+      - RABBIT_PASSWORD=${RABBITMQ_DEFAULT_PASS:-rabbitmq}
+    ports:
+      - "9092:9090"
+    networks:
+      - monitoring_network
+    depends_on:
+      - rabbitmq
+
+networks:
+  monitoring_network:
+    driver: bridge
+  saas_network:
+    external: true
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  pushgateway_data:
+  alertmanager_data:
