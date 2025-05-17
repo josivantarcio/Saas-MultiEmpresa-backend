@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 // Importar reducers
-import cartReducer from './cartSlice';
+import cartReducer from './features/cartSlice';
 
 // Os reducers agora são importados de seus respectivos arquivos
 

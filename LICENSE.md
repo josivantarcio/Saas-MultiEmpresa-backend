@@ -25,7 +25,7 @@
    - Este acordo será regido e interpretado de acordo com as leis do Brasil, sem considerar seus princípios de conflito de leis.
 
 7. **Contato**
-   - Para solicitações de uso ou outras questões relacionadas a direitos autorais, entre em contato através do e-mail: josevan.oliveira@example.com
+   - Para solicitações de uso ou outras questões relacionadas a direitos autorais, entre em contato através do e-mail: josivantarcio@msn.com
 
 ---
 

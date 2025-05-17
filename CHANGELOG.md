@@ -2,7 +2,38 @@
 
 Este arquivo documenta todas as alterações significativas feitas no projeto E-commerce SaaS Platform. Sempre que ocorrer implementações ou remoções, este arquivo deve ser atualizado.
 
-## [v0.7.0] - 2025-06-15
+## [v0.6.2] - 2025-05-17
+
+### Adicionado
+- Implementação completa da página de detalhes do produto com:
+  - Galeria de imagens com miniaturas
+  - Sistema de abas para descrição, especificações e avaliações
+  - Seção de produtos relacionados
+- Implementação das páginas de categorias:
+  - Página principal com listagem de todas as categorias
+  - Página de detalhes de categoria com filtros, ordenação e paginação
+
+### Alterado
+- Atualização do arquivo DOCUMENTACAO.md com o progresso das implementações
+
+## [v0.6.1] - 2025-05-16
+
+### Adicionado
+- Página de Produtos com filtros por categoria, preço e avaliação
+- Página de Promoções com produtos em desconto
+- Páginas de autenticação (login, cadastro e recuperação de senha)
+- Fluxo completo de checkout (carrinho, entrega, pagamento e confirmação)
+- Documentação consolidada no arquivo DOCUMENTACAO.md
+
+### Alterado
+- Atualização de todos os endereços de email para josivantarcio@msn.com
+- README.md traduzido para português brasileiro
+
+### Removido
+- Arquivos de documentação redundantes em arquivos essenciais
+- Atualização do arquivo DOCUMENTACAO.md com status atual e próximos passos
+
+## [v0.7.0] - 2025-06-15 (Planejado)
 
 ### Adicionado
 - Implementação da integração entre os microserviços
