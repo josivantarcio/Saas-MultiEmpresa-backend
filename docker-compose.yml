@@ -16,7 +16,7 @@ services:
       - saas_network
 
   mongodb:
-    image: mongo:6-jammy
+    image: mongo:4.4.24
     container_name: saas_ecommerce_mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongodb

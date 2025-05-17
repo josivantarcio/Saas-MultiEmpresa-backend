@@ -1,16 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
-// Reducers serão importados aqui quando implementados
-// import cartReducer from './features/cart/cartSlice';
+// Importar reducers
+import cartReducer from './cartSlice';
 
-// Temporary reducer até que os slices sejam implementados
-const cartReducer = (state = { items: [], total: 0, quantity: 0 }, action: any) => {
-  switch (action.type) {
-    default:
-      return state;
-  }
-};
+// Os reducers agora são importados de seus respectivos arquivos
 
 export const store = configureStore({
   reducer: {

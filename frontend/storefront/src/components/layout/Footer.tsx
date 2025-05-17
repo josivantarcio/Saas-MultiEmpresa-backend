@@ -6,7 +6,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-white pt-12 pb-8">
+    <footer className="bg-gray-900 text-white pt-12">
       <div className="container mx-auto px-4">
         {/* Seção principal do rodapé */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -219,14 +219,17 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="mt-8 pt-6 border-t border-gray-800 text-center text-sm text-gray-400">
-            <p>© {currentYear} EcomSaaS Store. Todos os direitos reservados.</p>
-            <p className="mt-2">
-              <Link href="/termos" className="hover:text-white">Termos de Uso</Link>
-              <span className="mx-2">|</span>
-              <Link href="/privacidade" className="hover:text-white">Política de Privacidade</Link>
-            </p>
+          {/* Rodapé inferior */}
+          <div className="mt-8 pt-6 border-t border-gray-800 text-center text-gray-400 text-sm">
+            <p>&copy; {currentYear} EcomSaaS Store. Todos os direitos reservados a Jôsevan Tárcio Silva de Oliveira.</p>
+            <div className="mt-2">
+              <Link href="/termos" className="hover:text-white mr-4">Termos de Uso</Link>
+              <Link href="/privacidade" className="hover:text-white mr-4">Política de Privacidade</Link>
+              <Link href="/licenca" className="hover:text-white">Licença</Link>
+            </div>
+            <div className="mt-2 text-xs">
+              <p>Este software é protegido por direitos autorais. Qualquer uso não autorizado é estritamente proibido.</p>
+            </div>
           </div>
         </div>
       </div>
