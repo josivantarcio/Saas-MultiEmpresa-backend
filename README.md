@@ -5,7 +5,7 @@ Uma plataforma completa de e-commerce multi-tenant projetada para ser oferecida 
 ## Versão Atual: v0.6.2 (17/05/2025)
 
 [![Versão Atual](https://img.shields.io/github/v/tag/josivantarcio/Saas-MultiEmpresa-backend?label=vers%C3%A3o&style=flat-square)](https://github.com/josivantarcio/Saas-MultiEmpresa-backend/releases)
-[![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg)](LICENSE.md)
+[![Licença](https://img.shields.io/badge/licen%C3%A7a-Uso%20Exclusivo-red.svg)](LICENSE.md)
 
 > Para ver o histórico completo de alterações, consulte o [CHANGELOG.md](CHANGELOG.md)
 
