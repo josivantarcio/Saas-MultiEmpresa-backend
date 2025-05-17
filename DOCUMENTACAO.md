@@ -61,7 +61,12 @@ EcomSaaS Store é uma plataforma de e-commerce SaaS multi-empresa com arquitetur
 5. ✅ Executar auditoria de segurança
 
 ### Prioridade Média
-1. Desenvolver painel do lojista
+1. ✅ Desenvolver painel do lojista (em andamento)
+   - ✅ Gerenciamento de clientes
+   - ✅ Gerenciamento de endereços
+   - ✅ Relatórios básicos
+   - ⬜ Gerenciamento de pedidos
+   - ⬜ Configurações da loja
 2. Implementar integração com gateway de pagamento
 3. Configurar ambiente de produção
 4. Implementar monitoramento

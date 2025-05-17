@@ -2,6 +2,19 @@
 
 Este arquivo documenta todas as alterações significativas feitas no projeto E-commerce SaaS Platform. Sempre que ocorrer implementações ou remoções, este arquivo deve ser atualizado.
 
+## [v0.6.3] - 2025-05-17
+
+### Adicionado
+- Implementação do gerenciamento de endereços na página de detalhes do cliente
+- Adicionada funcionalidade de adicionar, editar e remover endereços
+- Implementação de validação de formulário para endereços
+- Adicionados feedbacks visuais com react-toastify
+
+### Melhorias
+- Melhorias na interface do usuário do painel do lojista
+- Otimizações de desempenho na renderização de listas
+- Melhorias na responsividade do painel
+
 ## [v0.6.2] - 2025-05-17
 
 ### Adicionado
